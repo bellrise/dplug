@@ -1,0 +1,69 @@
+dplug
+-----
+
+"Dynamic Plugins" - small C library for creating and using dynamic plugins,
+which are runtime-loadable. Built as a very generic utility, each "method"
+(callable plugin function) takes any pointer and returns any pointer.
+
+
+example
+-------
+
+common.h:
+
+	struct arguments
+	{
+		int a;
+		int b;
+	};
+
+	struct return_value
+	{
+		int c;
+	};
+
+main.c:
+
+	/* In some function */
+
+	struct dplug *plugin;
+	struct return_value *return_value;
+	struct arguments args;
+
+	plugin = dplug_load("./test.plug");
+
+	args.a = 5;
+	args.b = 10;
+
+	/* Call the `add` method. */
+	return_value = dplug_call(plugin, "add", &args);
+
+	printf("5 + 10 = %d\n", return_value->c);
+
+	free(return_value);
+	dplug_close(plugin);
+
+test-plug.c:
+
+	#include <dplug.h>
+	#include <stdlib.h>
+	#include "common.h"
+
+	void *add(void *args_)
+	{
+		struct arguments *args = args_;
+		struct return_value *ret;
+		ret = malloc(sizeof(*ret));
+
+		ret->c = args->a + args->b;
+
+		return ret;
+	}
+
+	DPLUG_PLUGIN ({
+		.d_name = "test",
+		.d_methods = {
+			{"add", add},
+			{NULL, NULL}
+		}
+	});
