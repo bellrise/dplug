@@ -6,6 +6,15 @@ which are runtime-loadable. Built as a very generic utility, each "method"
 (callable plugin function) takes any pointer and returns any pointer.
 
 
+use
+---
+
+Compile & install the static library and headers using `make install` as root.
+You can then use it in another project, by linking against libdplug.
+
+	$ cc main.c -ldplug
+
+
 example
 -------
 
@@ -59,6 +68,9 @@ test-plug.c:
 
 		return ret;
 	}
+
+	/* Note that the d_methods field must end with a {NULL, NULL} pair,
+	   or otherwise the program _will_ segfault. */
 
 	DPLUG_PLUGIN ({
 		.d_name = "test",
